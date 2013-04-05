@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<GenericAggHandlerConfig>
+	<AggregateInfo>
+		<Table>a_sandbox_test</Table>
+		<CreateTableStatement>
+		
+		CREATE TABLE a_sandbox_test (
+		   number integer,
+		   number_sup char(1),
+		   trip integer,
+		   trip_sup char(1),
+		   invoice integer,
+		   chamber char(1)
+		);
+
+		<!--
+		create index a_sandbox_ic_facility_trans_payor_ia_month_facility_idx on a_sandbox_ic_facility_trans_payor_ia_month(FACILITY_SK);
+		create index a_sandbox_ic_facility_trans_payor_ia_month_payor_idx on a_sandbox_ic_facility_trans_payor_ia_month(PAYOR_SK);
+		create index a_sandbox_ic_facility_trans_payor_ia_month_item_idx on a_sandbox_ic_facility_trans_payor_ia_month(ITEM_SK);
+
+		create index a_sandbox_ic_facility_trans_payor_ia_month_year_idx on a_sandbox_ic_facility_trans_payor_ia_month(DIM_DATE_Year);
+		create index a_sandbox_ic_facility_trans_payor_ia_month_quarter_idx on a_sandbox_ic_facility_trans_payor_ia_month(DIM_DATE_Year,DIM_DATE_Quarter);
+		create index a_sandbox_ic_facility_trans_payor_ia_month_month_idx on a_sandbox_ic_facility_trans_payor_ia_month(DIM_DATE_Year,DIM_DATE_Quarter,DIM_DATE_Month);
+		-->
+
+		</CreateTableStatement>
+		<TableExistsStatement>a_sandbox_test</TableExistsStatement>
+		<DropTableStatement>DROP TABLE a_sandbox_test</DropTableStatement>
+
+		<!-- AggregateMode can be TRUNCATE or INCREMENT;
+		
+		TRUNCATE will issue a DROP TABLE and recreate it. 
+		INCREMENT will try to find the new objects and insert only those 
+		
+		-->
+		
+		<AggregateMode>TRUNCATE</AggregateMode>
+
+		<InsertQuery>
+
+		INSERT INTO a_sandbox_test (number,number_sup,trip,trip_sup,invoice,chamber)
+		SELECT number,number_sup,trip,trip_sup,invoice,chamber FROM invoices;
+
+		</InsertQuery>
+		<!-- QueryOnFact and QueryOnAggregate must return a single column named "value" -->
+		
+		<QueryOnFact>
+		</QueryOnFact>
+		<QueryOnAggregate>
+		</QueryOnAggregate>
+		<QuoteValue>true</QuoteValue>
+		<IncrementQuery>
+		</IncrementQuery>
+		
+
+		<!--
+			
+		IncrementConditionFrom and IncrementConditionWhere are javascript functions who's 
+		output will be inserted in the incremental query condition, in the place of the
+		token ${INCREMENT_CONDITION_FROM} and ${INCREMENT_CONDITION_WHERE}
+
+		Use when extra filtering logic is needed, like exclude today's date from the list of info
+		to be extracted, eg:
+
+		<IncrementConditionWhere>
+			<![CDATA[
+			var a = function(){
+				var now  = new Date();
+				return " and  date <= " +  (now.getYear()+ 1900) + "-" + (now.getMonth()+1) + "-" + now.getDate()
+			}
+			a()
+			]]>
+		</IncrementConditionWhere>
+
+		-->
+		<IncrementConditionWhere>
+			<![CDATA[
+			var a = function(){
+				var now  = new Date();
+				var monthStr = now.getUTCMonth()+1>=10?now.getUTCMonth()+1:"0"+(now.getUTCMonth()+1);
+				var dayStr = now.getUTCDate()>=10?now.getUTCDate():"0"+(now.getUTCDate());
+				
+				return " and  dates.date <= '" + now.getUTCFullYear() + "-" + monthStr + "-" + dayStr + "'"
+			}
+			a()
+			]]>
+		</IncrementConditionWhere>
+
+		<IncrementConditionFrom/>
+
+	</AggregateInfo>
+	
+</GenericAggHandlerConfig>

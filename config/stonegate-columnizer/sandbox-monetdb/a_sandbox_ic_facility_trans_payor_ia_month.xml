@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<ColumnizerConfig>
+
+	<!-- ColumnizeMode can be TRUNCATE or INCREMENT;
+
+	TRUNCATE will issue a DROP TABLE and recreate it. 
+	INCREMENT will try to find the new objects and insert only those 
+
+	-->
+
+	<ColumnizeMode>TRUNCATE</ColumnizeMode>
+
+	<ColumnizeInfo>
+		<Source>
+			<!--  The select query on the source -->
+			<SelectQuery>
+
+				SELECT number,number_sup,trip,trip_sup,invoice,chamber FROM invoices;
+
+			</SelectQuery>
+		</Source>
+		<Target>
+			<Database>MONETDB</Database>
+			<Table>a_sandbox_test</Table>
+			<!--<CountStatement>a_sandbox_test</CountStatement>-->
+			<TableExistsStatement>a_sandbox_test</TableExistsStatement>
+			<DropTableStatement>drop table a_sandbox_test</DropTableStatement>
+			<CreateTableStatement>
+
+				CREATE TABLE a_sandbox_test (
+				   number integer,
+				   number_sup char(1),
+				   trip integer,
+				   trip_sup char(1),
+				   invoice integer,
+				   chamber char(1)
+				);
+
+			</CreateTableStatement>
+
+		</Target>
+	</ColumnizeInfo>
+
+</ColumnizerConfig>
